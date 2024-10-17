@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eddigi munkáim</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Verdana', sans-serif;
+            background-color: #f5f5dc;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .dark-mode {
+            background-color: #333;
+            color: #f5f5dc;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            width: 200px;
+            height: 300px;
+            perspective: 1000px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .card:hover .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #6F4C3E;
+            border-radius: 10px;
+        }
+
+        .card-front {
+            background-color: #4B3C32;
+            color: #fff;
+        }
+
+        .card-back {
+            background-color: #D9C2A4;
+            color: #333;
+            transform: rotateY(180deg);
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            background-color: #f5f5dc;
+            border: 2px solid #6F4C3E;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+        }
+
+        .popup-content {
+            text-align: center;
+        }
+
+        .close {
+            cursor: pointer;
+            font-size: 24px;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: #6F4C3E;
+        }
+
+        .card-button {
+            margin-top: 10px; /* Kártya alján helyezkedik el */
+            padding: 10px 15px;
+            background-color: #6F4C3E;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .toggle-button {
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            background-color: #6F4C3E;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .chatbot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            height: 400px;
+            display: none;
+            border: 1px solid #6F4C3E;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 3;
+        }
+
+        .chatbot-header {
+            background-color: #6F4C3E;
+            color: white;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+        }
+
+        .chatbot-content {
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+        }
+
+        .chatbot-input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: calc(100% - 22px);
+            margin: 5px;
+        }
+
+        .chatbot-toggle {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: #6F4C3E;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .card img {
+            max-width: 80%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        .popup img {
+            max-width: 100%;
+            max-height: 150px;
+            margin: 10px 0 0 0;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                width: 150px;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="toggle-button" id="toggle-mode">Sötét mód</button>
+
+    <div class="popup" id="welcome-popup">
+        <div class="popup-content">
+            <p>Szia! Tóth Jázmin Máriának hívnak, 17 éves vagyok és Mátészalkára járok a Gépszetibe Informatika szakra.</p>
+            <img src="chicken.jpg" alt="Alternate Text" />
+            <span class="close" id="welcome-close">&times;</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card" data-info="Ez az első kártya.">
+            <div class="card-inner">
+                <div class="card-front">
+                    <p>Az önéletrajzom</p>
+                    <img src="oneletrajz.png" alt="Alternate Text" />
+                </div>
+                <div class="card-back">
+                    <p>További tudnivalók a munkámról.</p>
+                </div>
+            </div>
+            <button class="card-button">Önéletrajz</button>
+        </div>
+        <div class="card" data-info="Ez a második kártya.">
+            <div class="card-inner">
+                <div class="card-front">
+                    <p>Egy másik munkám.</p>
+                    <img src="biztonsag.png" alt="Alternate Text" />
+                </div>
+                <div class="card-back">
+                    <p>További tudnivalók a munkámról.</p>
+                </div>
+            </div>
+            <button class="card-button">IT Biztonság</button>
+        </div>
+        <div class="card" data-info="Ez a harmadik kártya.">
+            <div class="card-inner">
+                <div class="card-front">
+                    <p>Még egy munkám.</p>
+                    <img src="kuldetes.png" alt="Alternate Text" />
+                </div>
+                <div class="card-back">
+                    <p>További tudnivalók a munkámról.</p>
+                </div>
+            </div>
+            <button class="card-button">Excel küldetések</button>
+        </div>
+        <div class="card" data-info="Ez a negyedik kártya.">
+            <div class="card-inner">
+                <div class="card-front">
+                    <p>Legutóbbi munkám.</p>
+                    <img src="kerdoiv.png" alt="Alternate Text" />
+                </div>
+                <div class="card-back">
+                    <p>További tudnivalók a munkámról.</p>
+                </div>
+            </div>
+            <button class="card-button">KIFÜ kérdőív</button>
+        </div>
+    </div>
+
+    <div class="popup" id="popup">
+        <div class="popup-content">
+            <span class="close" id="close">&times;</span>
+            <p id="popup-text"></p>
+            <img src="your-image.jpg" alt="Kép" style="max-width: 100%; max-height: 150px; margin: 10px 0;">
+        </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="chatbot" id="chatbot">
+        <div class="chatbot-header">Chatbot</div>
+        <div class="chatbot-content" id="chatbot-content">
+            <p>Üdvözöljük! Miben segíthetek?</p>
+        </div>
+        <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Írj ide...">
+        <button class="chatbot-toggle" id="chatbot-toggle">Bezár</button>
+    </div>
+    <button class="chatbot-toggle" id="toggle-chatbot">Chatbot megnyitása</button>
+
+    <script>
+        // Üdvözlő pop-up megjelenítése
+        window.onload = function () {
+            document.getElementById('welcome-popup').style.display = 'flex';
+        };
+
+        document.getElementById('welcome-close').addEventListener('click', () => {
+            document.getElementById('welcome-popup').style.display = 'none';
+        });
+
+        document.querySelectorAll('.card-button').forEach(button => {
+            button.addEventListener('click', function (event) {
+                const card = event.target.closest('.card');
+                const info = card.getAttribute('data-info');
+                document.getElementById('popup-text').innerText = info;
+                document.getElementById('popup').style.display = 'flex';
+                event.stopPropagation();
+            });
+        });
+
+        document.getElementById('close').addEventListener('click', () => {
+            document.getElementById('popup').style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            const popup = document.getElementById('popup');
+            if (event.target === popup) {
+                popup.style.display = 'none';
+            }
+        });
+
+        // Sötét mód kapcsoló
+        document.getElementById('toggle-mode').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const buttonText = document.body.classList.contains('dark-mode') ? 'Világos mód' : 'Sötét mód';
+            document.getElementById('toggle-mode').innerText = buttonText;
+        });
+
+        // Chatbot megjelenítése/eltüntetése
+        document.getElementById('toggle-chatbot').addEventListener('click', () => {
+            const chatbot = document.getElementById('chatbot');
+            chatbot.style.display = chatbot.style.display === 'none' || chatbot.style.display === '' ? 'block' : 'none';
+        });
+
+        document.getElementById('chatbot-toggle').addEventListener('click', () => {
+            document.getElementById('chatbot').style.display = 'none';
+        });
+
+        // Chatbot interakció
+        document.getElementById('chatbot-input').addEventListener('keypress', function (event) {
+            if (event.key === 'Enter') {
+                const userInput = this.value;
+                const chatbotContent = document.getElementById('chatbot-content');
+                chatbotContent.innerHTML += `<p>Te: ${userInput}</p>`;
+                this.value = '';
+
+                let response;
+                if (userInput.includes('Hány éves vagy?')) {
+                    response = '17';
+                } else if (userInput.includes('Hol laksz?')) {
+                    response = 'Porcsalma';
+                } else if (userInput.includes('Mikor születtél?')) {
+                    response = '2007';
+                } else if (userInput.includes('Hova jársz iskolába?')) {
+                    response = 'Mátészalka Gépészeti Szakképzési Centrum és Kollégium';
+                } else if (userInput.includes('Milyen szakon tanulsz?')) {
+                    response = 'Informatika';
+                } else {
+                    response = 'Kérlek, tedd fel a kérdéseidet!';
+                }
+
+                chatbotContent.innerHTML += `<p>Chatbot: ${response}</p>`;
+                chatbotContent.scrollTop = chatbotContent.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
